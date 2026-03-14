@@ -106,7 +106,7 @@ export default function MapView({ sensors, selectedSensor, onSelectSensor }: Map
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">pH:</span>
-                      <span className="font-medium">{sensor.latestReading.pH.toFixed(2)}</span>
+                      <span className="font-medium">{sensor.latestReading.ph.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Turbidity:</span>

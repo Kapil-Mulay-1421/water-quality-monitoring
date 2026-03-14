@@ -99,7 +99,7 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
 
             {sensor.latestReading ? (
               <div className="grid grid-cols-2 gap-4">
-                <ReadingCard label="pH" value={sensor.latestReading.pH.toFixed(2)} unit="" icon="💧" color="text-purple-600"/>
+                <ReadingCard label="pH" value={sensor.latestReading.ph.toFixed(2)} unit="" icon="💧" color="text-purple-600"/>
                 <ReadingCard label="Turbidity" value={sensor.latestReading.turbidity.toFixed(2)} unit="NTU" icon="🌫️" color="text-amber-600"/>
                 <ReadingCard label="Temperature" value={sensor.latestReading.temperature.toFixed(1)} unit="°C" icon="🌡️" color="text-red-600"/>
                 <ReadingCard label="Hardness" value={sensor.latestReading.hardness.toFixed(1)} unit="mg/L" icon="💎" color="text-blue-600"/>

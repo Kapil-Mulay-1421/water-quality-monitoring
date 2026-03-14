@@ -50,7 +50,7 @@ export default function SensorDashboard({ sensor }: SensorDashboardProps) {
   // Prepare chart data
   const chartData = readings.map(reading => ({
     timestamp: format(new Date(reading.timestamp), 'MMM dd HH:mm'),
-    pH: reading.pH,
+    ph: reading.ph,
     turbidity: reading.turbidity,
     temperature: reading.temperature,
     hardness: reading.hardness,
@@ -67,7 +67,7 @@ export default function SensorDashboard({ sensor }: SensorDashboardProps) {
   };
 
   const stats = {
-    pH: calculateStats(readings.map(r => r.pH)),
+    ph: calculateStats(readings.map(r => r.ph)),
     turbidity: calculateStats(readings.map(r => r.turbidity)),
     temperature: calculateStats(readings.map(r => r.temperature)),
     hardness: calculateStats(readings.map(r => r.hardness)),
@@ -132,8 +132,8 @@ export default function SensorDashboard({ sensor }: SensorDashboardProps) {
           <div className="grid grid-cols-2 gap-3">
             <StatCard
               title="pH"
-              current={sensor.latestReading?.pH}
-              stats={stats.pH}
+              current={sensor.latestReading?.ph}
+              stats={stats.ph}
               unit=""
             />
             <StatCard
@@ -161,7 +161,7 @@ export default function SensorDashboard({ sensor }: SensorDashboardProps) {
             <ChartSection
               title="pH Level"
               data={chartData}
-              dataKey="pH"
+              dataKey="ph"
               color="#8b5cf6"
               yDomain={[0, 14]}
             />

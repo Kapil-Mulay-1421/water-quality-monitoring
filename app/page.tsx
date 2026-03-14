@@ -1,5 +1,5 @@
-import SensorMap from '@/components/SensorMap';
+import HomeClient from '@/components/HomeClient';
 
 export default function Home() {
-  return <SensorMap />;
+  return <HomeClient />;
 }

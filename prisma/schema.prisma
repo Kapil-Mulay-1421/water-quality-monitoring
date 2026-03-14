@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+}
+
+model Sensor {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sensorId     String   @unique
+  latitude     Float
+  longitude    Float
+  locationName String?
+  installedAt  DateTime @default(now())
+
+  readings     Reading[]
+}
+
+model Reading {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sensorId    String
+  timestamp   DateTime @default(now())
+  ph          Float
+  turbidity   Float
+  temperature Float
+  hardness    Float
+  potability  Int?     // 0 = not potable, 1 = potable (from ML model)
+
+  sensor      Sensor   @relation(fields: [sensorId], references: [sensorId])
+}
