@@ -5,16 +5,17 @@ const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://broker.hivemq.com:1883';
 const MQTT_TOPIC = 'sensors/water-quality';
 
 const sensorIds = [
-  'SENSOR_NYC_001',
-  'SENSOR_LON_001',
-  'SENSOR_TKY_001',
-  'SENSOR_SYD_001',
-  'SENSOR_PAR_001',
-  'SENSOR_MUM_001',
-  'SENSOR_SAO_001',
-  'SENSOR_CAI_001',
-  'SENSOR_SFO_001',
-  'SENSOR_SIN_001',
+  // 'SENSOR_NYC_001',
+  // 'SENSOR_LON_001',
+  // 'SENSOR_TKY_001',
+  // 'SENSOR_SYD_001',
+  // 'SENSOR_PAR_001',
+  // 'SENSOR_MUM_001',
+  // 'SENSOR_SAO_001',
+  // 'SENSOR_CAI_001',
+  // 'SENSOR_SFO_001',
+  'SENSOR_PUN_001',
+  'SENSOR_PUN_002',
 ];
 
 function generateReading(sensorId) {
@@ -59,7 +60,7 @@ function startSimulator() {
       
       client.publish(topic, JSON.stringify(reading));
       console.log(`📤 ${randomSensor}: pH=${reading.pH}, temp=${reading.temperature}°C`);
-    }, 5000 + Math.random() * 10000); // Random interval between 5-15 seconds
+    }, 1000 + Math.random() * 2000); // Random interval between 5-15 seconds
   });
   
   client.on('error', (error) => {

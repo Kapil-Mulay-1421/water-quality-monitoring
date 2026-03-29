@@ -6,9 +6,14 @@ export async function GET() {
     const sensors = await prisma.sensor.findMany({
       orderBy: { installedAt: 'desc' },
     });
+
     return NextResponse.json(sensors);
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch sensors' }, { status: 500 });
+  } catch (err) {
+    console.error(err); // 👈 ADD THIS
+    return NextResponse.json(
+      { error: 'Failed to fetch sensors' },
+      { status: 500 }
+    );
   }
 }
 
