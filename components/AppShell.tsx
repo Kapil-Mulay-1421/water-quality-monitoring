@@ -1,7 +1,7 @@
 'use client';
 import { ReactNode } from "react";
 import { Activity } from "lucide-react";
-import { Link } from "wouter";
+import Link from "next/link";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Activity className="h-7 w-7 group-hover:animate-pulse" />
             <div className="absolute inset-0 bg-cyan-400 blur-md opacity-40 group-hover:opacity-80 transition-opacity" />
           </div>
-          AQUA-NET
+          HYDROSENSE
         </Link>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-xs font-display tracking-widest text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">

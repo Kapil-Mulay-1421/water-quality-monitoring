@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function generateStaticParams() {
+  try {
+    const sensors = await prisma.sensor.findMany({
+      select: { sensorId: true },
+    });
+    return sensors.map((sensor) => ({
+      sensorId: sensor.sensorId,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function GET(
   _request: Request,
   { params }: { params: { sensorId: string } }

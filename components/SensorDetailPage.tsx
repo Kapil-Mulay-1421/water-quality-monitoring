@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { format } from 'date-fns';
 import { SensorWithLatestReading } from '@/lib/types';
 import SensorDashboard from './SensorDashboard';
 
@@ -15,17 +16,44 @@ interface SensorDetailPageProps {
 
 export default function SensorDetailPage({ sensor: initialSensor }: SensorDetailPageProps) {
   const [sensor, setSensor] = useState(initialSensor);
+  const [latestReading, setLatestReading] = useState(initialSensor.latestReading);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchLatestReading = async (sensorId: string) => {
+    try {
+      const url = new URL('/api/readings', window.location.origin);
+      url.searchParams.append('sensorId', sensorId);
+      url.searchParams.append('latest', 'true');
+      
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error('Failed to fetch latest reading');
+      
+      const readings = await response.json();
+      console.log("here")
+      console.log(readings[0])
+      if (readings.length > 0) {
+        setLatestReading(readings[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching latest reading:', error);
+    }
+  };
 
   const refreshData = async () => {
     setRefreshing(true);
+    console.log('refreshing...');
     try {
       const response = await fetch('/api/sensors');
       const sensors = await response.json();
+      console.log(sensors)
       const updatedSensor = sensors.find((s: any) => s.sensorId === sensor.sensorId);
       if (updatedSensor) {
-        setSensor(updatedSensor);
+        setSensor({ ...updatedSensor });
+        setRefreshKey(prev => prev + 1);
       }
+      // Fetch the latest reading from the readings API
+      await fetchLatestReading(sensor.sensorId);
     } catch (error) {
       console.error('Error refreshing sensor data:', error);
     } finally {
@@ -39,8 +67,13 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
     return () => clearInterval(interval);
   }, [sensor.sensorId]);
 
+  // Fetch latest reading on mount
+  useEffect(() => {
+    fetchLatestReading(sensor.sensorId);
+  }, [sensor.sensorId]);
+
   return (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 overflow-y-auto mb-10">
     {/* HEADER */}
     <header className="sticky top-0 z-20 backdrop-blur bg-white/80 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -59,7 +92,7 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
               {sensor.locationName || sensor.sensorId}
             </h1>
             <p className="text-sm text-gray-500">
-              Sensor • Installed {new Date(sensor.installedAt).toLocaleDateString()}
+              Sensor • Installed {format(new Date(sensor.installedAt), 'MMM dd, yyyy')}
             </p>
           </div>
         </div>
@@ -97,12 +130,13 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
               Current Water Quality
             </h2>
 
-            {sensor.latestReading ? (
+            {latestReading ? (
               <div className="grid grid-cols-2 gap-4">
-                <ReadingCard label="pH" value={sensor.latestReading.ph.toFixed(2)} unit="" icon="💧" color="text-purple-600"/>
-                <ReadingCard label="Turbidity" value={sensor.latestReading.turbidity.toFixed(2)} unit="NTU" icon="🌫️" color="text-amber-600"/>
-                <ReadingCard label="Temperature" value={sensor.latestReading.temperature.toFixed(1)} unit="°C" icon="🌡️" color="text-red-600"/>
-                <ReadingCard label="Hardness" value={sensor.latestReading.hardness.toFixed(1)} unit="mg/L" icon="💎" color="text-blue-600"/>
+                <ReadingCard label="pH" value={latestReading.ph.toFixed(2)} unit="" icon="💧" color="text-purple-600"/>
+                <ReadingCard label="Turbidity" value={latestReading.turbidity.toFixed(2)} unit="NTU" icon="🌫️" color="text-amber-600"/>
+                <ReadingCard label="Temperature" value={latestReading.temperature.toFixed(1)} unit="°C" icon="🌡️" color="text-red-600"/>
+                <ReadingCard label="Hardness" value={latestReading.hardness.toFixed(1)} unit="mg/L" icon="💎" color="text-blue-600"/>
+                <ReadingCard label="Potability" value={latestReading.potability !== undefined && latestReading.potability !== null ? `${(latestReading.potability * 100).toFixed(2)}%` : 'N/A'} unit="" icon={getPotabilityIcon(latestReading.potability)} color={getPotabilityColor(latestReading.potability)}/>
               </div>
             ) : (
               <p className="text-gray-500 text-center py-10">No live readings</p>
@@ -133,20 +167,38 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
               Historical Analytics
             </h2>
           </div>
 
-          <SensorDashboard sensor={sensor} />
+          <div className="max-h-[800px] overflow-y-auto">
+            <SensorDashboard key={refreshKey} sensor={sensor} />
+          </div>
         </div>
 
       </div>
     </main>
   </div>
 );
+}
+
+function getPotabilityColor(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return 'text-gray-500';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'text-green-600';
+  if (percentage >= 30) return 'text-yellow-600';
+  return 'text-red-600';
+}
+
+function getPotabilityIcon(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return '⏳';
+  const percentage = potability * 100;
+  if (percentage > 80) return '✅';
+  if (percentage >= 30) return '⚠️';
+  return '⛔';
 }
 
 function ReadingCard({

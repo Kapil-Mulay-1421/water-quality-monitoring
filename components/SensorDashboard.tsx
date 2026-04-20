@@ -74,7 +74,7 @@ export default function SensorDashboard({ sensor }: SensorDashboardProps) {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 mb-10">
       {/* Time Range Selector */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Time Range</label>

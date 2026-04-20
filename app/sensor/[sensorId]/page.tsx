@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import SensorDetailPage from '@/components/SensorDetailPage';
+import { prisma } from '@/lib/prisma';
 
 // This is a Server Component that fetches initial data
 async function getSensorData(sensorId: string) {
@@ -19,6 +20,20 @@ async function getSensorData(sensorId: string) {
   } catch (error) {
     console.error('Error fetching sensor:', error);
     return null;
+  }
+}
+
+export async function generateStaticParams() {
+  try {
+    const sensors = await prisma.sensor.findMany({
+      select: { sensorId: true },
+    });
+    return sensors.map((sensor) => ({
+      sensorId: sensor.sensorId,
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
   }
 }
 

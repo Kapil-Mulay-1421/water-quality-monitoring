@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Sensor {
@@ -21,11 +22,11 @@ model Reading {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   sensorId    String
   timestamp   DateTime @default(now())
-  ph          Float
+  ph          Float    @map("pH")
   turbidity   Float
   temperature Float
   hardness    Float
-  potability  Int?     // 0 = not potable, 1 = potable (from ML model)
+  potability  Float?   // 0-1 probability from ML model
 
   sensor      Sensor   @relation(fields: [sensorId], references: [sensorId])
 }

@@ -28,13 +28,22 @@ export async function GET(request: Request) {
     const where: any = { timestamp: timestampFilter };
     if (sensorId) where.sensorId = sensorId;
 
+    if (searchParams.get('latest') === 'true') {
+      const latestReading = await prisma.reading.findFirst({
+        where,
+        orderBy: { timestamp: 'desc' },
+      });
+      return NextResponse.json(latestReading ? [latestReading] : []);
+    }
+
     const readings = await prisma.reading.findMany({
       where,
       orderBy: { timestamp: 'asc' },
     });
 
     return NextResponse.json(readings);
-  } catch {
+  } catch (err) {
+    console.log(err);
     return NextResponse.json({ error: 'Failed to fetch readings' }, { status: 500 });
   }
 }
@@ -62,7 +71,7 @@ export async function POST(request: Request) {
         turbidity: parseFloat(turbidity),
         temperature: parseFloat(temperature),
         hardness: parseFloat(hardness),
-        potability: potability !== undefined ? parseInt(potability) : null,
+        potability: potability !== undefined ? parseFloat(potability) : null,
       },
     });
 
