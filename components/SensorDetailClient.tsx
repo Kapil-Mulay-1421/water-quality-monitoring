@@ -104,29 +104,21 @@ export default function SensorDetailClient({ sensorId }: { sensorId: string }) {
         {/* Potability Status Banner */}
 {latestReading && (
   <div className={`rounded-2xl p-5 border-2 flex items-center gap-4 ${
-    latestReading.potability === 1
-      ? 'bg-green-950/30 border-green-500/50 shadow-[0_0_20px_rgba(74,222,128,0.1)]'
-      : latestReading.potability === 0
-      ? 'bg-red-950/30 border-red-500/50 shadow-[0_0_20px_rgba(248,113,113,0.1)]'
-      : 'bg-slate-900/50 border-slate-700'
+    getPotabilityBannerStyle(latestReading.potability)
   }`}>
     <div className={`text-3xl ${
-      latestReading.potability === 1 ? 'drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : ''
+      getPotabilityGlow(latestReading.potability)
     }`}>
-      {latestReading.potability === 1 ? '✅' : latestReading.potability === 0 ? '⛔' : '⏳'}
+      {getPotabilityIcon(latestReading.potability)}
     </div>
     <div>
       <p className={`font-display text-xl tracking-widest uppercase ${
-        latestReading.potability === 1 ? 'text-green-400' 
-        : latestReading.potability === 0 ? 'text-red-400' 
-        : 'text-slate-500'
+        getPotabilityTextColor(latestReading.potability)
       }`}>
-        {latestReading.potability === 1 ? 'WATER POTABLE' 
-         : latestReading.potability === 0 ? 'NOT POTABLE' 
-         : 'POTABILITY UNKNOWN'}
+        {getPotabilityStatusText(latestReading.potability)}
       </p>
       <p className="text-xs text-slate-500 font-mono mt-1">
-        ML INFERENCE {latestReading.potability !== null ? '— CLASSIFICATION COMPLETE' : '— AWAITING MODEL'}
+        ML INFERENCE {latestReading.potability !== null ? `— ${(latestReading.potability * 100).toFixed(2)}% CONFIDENCE` : '— AWAITING MODEL'}
       </p>
     </div>
   </div>
@@ -194,4 +186,52 @@ export default function SensorDetailClient({ sensorId }: { sensorId: string }) {
       </div>
     </div>
   );
+}
+
+function getPotabilityColor(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return 'text-gray-500';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'text-green-600';
+  if (percentage >= 30) return 'text-yellow-600';
+  return 'text-red-600';
+}
+
+function getPotabilityIcon(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return '⏳';
+  const percentage = potability * 100;
+  if (percentage > 80) return '✅';
+  if (percentage >= 30) return '⚠️';
+  return '⛔';
+}
+
+function getPotabilityBannerStyle(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return 'bg-slate-900/50 border-slate-700';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'bg-green-950/30 border-green-500/50 shadow-[0_0_20px_rgba(74,222,128,0.1)]';
+  if (percentage >= 30) return 'bg-yellow-950/30 border-yellow-500/50 shadow-[0_0_20px_rgba(251,191,36,0.1)]';
+  return 'bg-red-950/30 border-red-500/50 shadow-[0_0_20px_rgba(248,113,113,0.1)]';
+}
+
+function getPotabilityGlow(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return '';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]';
+  if (percentage >= 30) return 'drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]';
+  return 'drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]';
+}
+
+function getPotabilityTextColor(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return 'text-slate-500';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'text-green-400';
+  if (percentage >= 30) return 'text-yellow-400';
+  return 'text-red-400';
+}
+
+function getPotabilityStatusText(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return 'POTABILITY UNKNOWN';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'HIGH POTABILITY';
+  if (percentage >= 30) return 'MODERATE POTABILITY';
+  return 'LOW POTABILITY';
 }

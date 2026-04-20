@@ -48,7 +48,7 @@ function validateReading(data) {
 }
 
 // Predict potability using external API
-async function getPotability(pH, turbidity, temperature, hardness) {
+async function getPotability(pH, hardness, turbidity, temperature) {
   return new Promise((resolve, reject) => {
     try {
       // Step 1: Make initial API call to get EVENT_ID
@@ -93,21 +93,42 @@ async function getPotability(pH, turbidity, temperature, hardness) {
               });
               predRes.on('end', () => {
                 try {
-                  // Parse the streaming response to get the final prediction
                   const lines = predData.trim().split('\n');
-                  let potability = null;
+                  let lastValue = null;
 
                   for (const line of lines) {
-                    if (line.startsWith('data:')) {
-                      const jsonStr = line.replace('data:', '').trim();
-                      const json = JSON.parse(jsonStr);
-                      if (json.data && json.data[0] !== undefined) {
-                        potability = json.data[0];
-                      }
+                    if (!line.startsWith('data:')) continue;
+
+                    const jsonStr = line.replace('data:', '').trim();
+                    const json = JSON.parse(jsonStr);
+                    if (Array.isArray(json) && json.length > 0) {
+                      lastValue = json[json.length - 1];
                     }
                   }
 
-                  resolve(potability !== null ? Math.round(potability) : 0);
+                  if (typeof lastValue !== 'string') {
+                    console.error('✗ Unexpected prediction payload:', lastValue);
+                    resolve(null);
+                    return;
+                  }
+
+                  if (!lastValue.includes('Probabilities')) {
+                    console.error('✗ Potability API returned an error or invalid response:', lastValue);
+                    resolve(null);
+                    return;
+                  }
+
+                  const match = lastValue.match(/ Potable:\s*([0-9.]+)/);
+                  
+                  const potability = match ? 1-parseFloat(match[1]) : null;
+
+                  if (potability === null || Number.isNaN(potability)) {
+                    console.error('✗ Could not extract Potable confidence from prediction:', lastValue);
+                    resolve(null);
+                    return;
+                  }
+
+                  resolve(potability);
                 } catch (error) {
                   console.error('✗ Error parsing potability prediction:', error.message);
                   resolve(null);
@@ -164,12 +185,13 @@ async function processMessage(topic, message) {
     // Get potability prediction from external API
     console.log('🔄 Fetching potability prediction...');
     const potability = await getPotability(data.pH, data.turbidity, data.temperature, data.hardness);
-    
-    if (potability !== null) {
+
+    if (potability !== null && typeof potability === 'number' && !Number.isNaN(potability)) {
       data.potability = potability;
       console.log(`✓ Potability: ${potability}`);
     } else {
-      console.warn('⚠ Could not get potability prediction, storing without it');
+      delete data.potability;
+      console.warn('⚠ Could not get valid potability prediction; dropping field before insert');
     }
     
     // Store reading with potability

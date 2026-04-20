@@ -71,7 +71,7 @@ export async function POST(request: Request) {
         turbidity: parseFloat(turbidity),
         temperature: parseFloat(temperature),
         hardness: parseFloat(hardness),
-        potability: potability !== undefined ? parseInt(potability) : null,
+        potability: potability !== undefined ? parseFloat(potability) : null,
       },
     });
 

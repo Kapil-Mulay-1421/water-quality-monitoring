@@ -60,7 +60,7 @@ function startSimulator() {
       
       client.publish(topic, JSON.stringify(reading));
       console.log(`📤 ${randomSensor}: pH=${reading.pH}, temp=${reading.temperature}°C`);
-    }, 1000 + Math.random() * 2000); // Random interval between 5-15 seconds
+    }, 5000 + Math.random() * 2000); // Random interval between 5-15 seconds
   });
   
   client.on('error', (error) => {

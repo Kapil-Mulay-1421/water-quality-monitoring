@@ -30,6 +30,8 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
       if (!response.ok) throw new Error('Failed to fetch latest reading');
       
       const readings = await response.json();
+      console.log("here")
+      console.log(readings[0])
       if (readings.length > 0) {
         setLatestReading(readings[0]);
       }
@@ -71,7 +73,7 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
   }, [sensor.sensorId]);
 
   return (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 overflow-y-auto">
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 overflow-y-auto mb-10">
     {/* HEADER */}
     <header className="sticky top-0 z-20 backdrop-blur bg-white/80 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -134,7 +136,7 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
                 <ReadingCard label="Turbidity" value={latestReading.turbidity.toFixed(2)} unit="NTU" icon="🌫️" color="text-amber-600"/>
                 <ReadingCard label="Temperature" value={latestReading.temperature.toFixed(1)} unit="°C" icon="🌡️" color="text-red-600"/>
                 <ReadingCard label="Hardness" value={latestReading.hardness.toFixed(1)} unit="mg/L" icon="💎" color="text-blue-600"/>
-                <ReadingCard label="Potability" value={latestReading.potability !== undefined && latestReading.potability !== null ? latestReading.potability.toString() : 'N/A'} unit="" icon="✅" color="text-green-600"/>
+                <ReadingCard label="Potability" value={latestReading.potability !== undefined && latestReading.potability !== null ? `${(latestReading.potability * 100).toFixed(2)}%` : 'N/A'} unit="" icon={getPotabilityIcon(latestReading.potability)} color={getPotabilityColor(latestReading.potability)}/>
               </div>
             ) : (
               <p className="text-gray-500 text-center py-10">No live readings</p>
@@ -181,6 +183,22 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
     </main>
   </div>
 );
+}
+
+function getPotabilityColor(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return 'text-gray-500';
+  const percentage = potability * 100;
+  if (percentage > 80) return 'text-green-600';
+  if (percentage >= 30) return 'text-yellow-600';
+  return 'text-red-600';
+}
+
+function getPotabilityIcon(potability: number | null | undefined): string {
+  if (potability === null || potability === undefined) return '⏳';
+  const percentage = potability * 100;
+  if (percentage > 80) return '✅';
+  if (percentage >= 30) return '⚠️';
+  return '⛔';
 }
 
 function ReadingCard({

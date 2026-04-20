@@ -26,7 +26,7 @@ model Reading {
   turbidity   Float
   temperature Float
   hardness    Float
-  potability  Int?     // 0 = not potable, 1 = potable (from ML model)
+  potability  Float?   // 0-1 probability from ML model
 
   sensor      Sensor   @relation(fields: [sensorId], references: [sensorId])
 }
