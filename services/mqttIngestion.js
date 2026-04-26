@@ -53,7 +53,7 @@ async function getPotability(pH, hardness, turbidity, temperature) {
     try {
       // Step 1: Make initial API call to get EVENT_ID
       const postData = JSON.stringify({
-        data: [pH, turbidity, temperature, hardness]
+        data: [pH, hardness, turbidity, temperature]
       });
 
       const options = {
@@ -120,7 +120,7 @@ async function getPotability(pH, hardness, turbidity, temperature) {
 
                   const match = lastValue.match(/ Potable:\s*([0-9.]+)/);
                   
-                  const potability = match ? 1-parseFloat(match[1]) : null;
+                  const potability = match ? parseFloat(match[1]) : null;
 
                   if (potability === null || Number.isNaN(potability)) {
                     console.error('✗ Could not extract Potable confidence from prediction:', lastValue);
@@ -184,7 +184,7 @@ async function processMessage(topic, message) {
     
     // Get potability prediction from external API
     console.log('🔄 Fetching potability prediction...');
-    const potability = await getPotability(data.pH, data.turbidity, data.temperature, data.hardness);
+    const potability = await getPotability(data.pH, data.hardness, data.turbidity, data.temperature);
 
     if (potability !== null && typeof potability === 'number' && !Number.isNaN(potability)) {
       data.potability = potability;
