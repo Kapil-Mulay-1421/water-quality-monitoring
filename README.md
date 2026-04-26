@@ -1,11 +1,12 @@
 ---
-title: HydroSense
+title: Water Quality Monitor
 emoji: 💧
 colorFrom: blue
 colorTo: green
 sdk: docker
 app_port: 3000
 ---
+
 # Water Quality Monitoring System
 
 A full-stack Next.js application for monitoring and visualizing water quality measurements from geographically distributed sensors worldwide.
