@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
 import Link from "next/link";
 import type { SensorResponse } from "@/lib/types";
 import L from 'leaflet';
@@ -30,61 +30,25 @@ const createNeonIcon = () => {
   });
 };
 
-const createPendingIcon = () => {
-  return new L.DivIcon({
-    className: "bg-transparent",
-    html: `
-      <div class="relative flex items-center justify-center w-8 h-8">
-        <div class="absolute inset-1 rounded-full bg-yellow-400/70 shadow-[0_0_20px_#facc15] border-2 border-yellow-200 z-10"></div>
-        <div class="absolute inset-0 rounded-full bg-yellow-400/30 animate-ping z-0"></div>
-      </div>
-    `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
-  });
-};
-
-interface ClickHandlerProps {
-  onMapClick?: (lat: number, lng: number) => void;
-}
-
-function MapClickHandler({ onMapClick }: ClickHandlerProps) {
-  useMapEvents({
-    click(e) {
-      if (onMapClick) {
-        onMapClick(e.latlng.lat, e.latlng.lng);
-      }
-    },
-  });
-  return null;
-}
-
 interface GlobalMapProps {
   sensors: SensorResponse[];
-  onMapClick?: (lat: number, lng: number) => void;
-  pendingLatLng?: { lat: number; lng: number } | null;
 }
 
-export function GlobalMap({ sensors, onMapClick, pendingLatLng }: GlobalMapProps) {
+export function GlobalMap({ sensors }: GlobalMapProps) {
   const neonIcon = createNeonIcon();
-  const pendingIcon = createPendingIcon();
 
   return (
     <MapContainer
       center={[20, 0]}
       zoom={3}
       minZoom={2}
-      className="w-full h-full bg-[#000000]"
+      className="w-full h-full bg-[#0a0a0f]"
       zoomControl={false}
-      style={{ cursor: onMapClick ? 'crosshair' : '' }}
     >
       <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
-
-      <MapClickHandler onMapClick={onMapClick} />
       
       {sensors?.map((sensor) => (
         <Marker
@@ -117,20 +81,6 @@ export function GlobalMap({ sensors, onMapClick, pendingLatLng }: GlobalMapProps
           </Popup>
         </Marker>
       ))}
-
-      {/* Pending marker from map click */}
-      {pendingLatLng && (
-        <Marker
-          position={[pendingLatLng.lat, pendingLatLng.lng]}
-          icon={pendingIcon}
-        >
-          <Tooltip direction="top" offset={[0, -16]} opacity={1} permanent>
-            <div className="font-display font-bold text-yellow-400 text-xs tracking-widest uppercase">
-              DEPLOY HERE
-            </div>
-          </Tooltip>
-        </Marker>
-      )}
     </MapContainer>
   );
 }

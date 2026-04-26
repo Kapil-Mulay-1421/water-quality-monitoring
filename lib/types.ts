@@ -1,6 +1,22 @@
-import type { Sensor, Reading } from '@prisma/client';
+export type Sensor = {
+  id: string;
+  sensorId: string;
+  latitude: number;
+  longitude: number;
+  locationName: string | null;
+  installedAt: Date | string;
+};
 
-export type { Sensor, Reading };
+export type Reading = {
+  id: string;
+  sensorId: string;
+  timestamp: Date | string;
+  ph: number;
+  turbidity: number;
+  temperature: number;
+  hardness: number;
+  potability: number | null;
+};
 
 export type SensorResponse = Sensor;
 export type ReadingResponse = Reading;

@@ -1,66 +1,29 @@
-import { notFound } from 'next/navigation';
-import SensorDetailPage from '@/components/SensorDetailPage';
-import { prisma } from '@/lib/prisma';
+import SensorDetailClient from '@/components/SensorDetailClient';
+import { getDefaultSensor, getDefaultSensors } from '@/lib/default-telemetry';
 
-// This is a Server Component that fetches initial data
-async function getSensorData(sensorId: string) {
-  try {
-    // In production, use full URL. In dev, relative works fine
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/sensors`, {
-      cache: 'no-store' // Always get fresh data
-    });
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const sensors = await response.json();
-    return sensors.find((s: any) => s.sensorId === sensorId);
-  } catch (error) {
-    console.error('Error fetching sensor:', error);
-    return null;
-  }
+export function generateStaticParams() {
+  return getDefaultSensors().map((sensor) => ({
+    sensorId: sensor.sensorId,
+  }));
 }
 
-export async function generateStaticParams() {
-  try {
-    const sensors = await prisma.sensor.findMany({
-      select: { sensorId: true },
-    });
-    return sensors.map((sensor) => ({
-      sensorId: sensor.sensorId,
-    }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
-}
-
-export default async function SensorPage({ 
-  params 
-}: { 
-  params: { sensorId: string } 
+export default function SensorPage({
+  params,
+}: {
+  params: { sensorId: string };
 }) {
-  const sensor = await getSensorData(params.sensorId);
-  
-  if (!sensor) {
-    notFound();
-  }
-  
-  return <SensorDetailPage sensor={sensor} />;
+  return <SensorDetailClient sensorId={params.sensorId} />;
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: { params: { sensorId: string } }) {
-  const sensor = await getSensorData(params.sensorId);
-  
+export function generateMetadata({ params }: { params: { sensorId: string } }) {
+  const sensor = getDefaultSensor(params.sensorId);
+
   if (!sensor) {
     return {
-      title: 'Sensor Not Found',
+      title: 'Sensor Telemetry',
     };
   }
-  
+
   return {
     title: `${sensor.locationName || sensor.sensorId} - Water Quality Monitor`,
     description: `View real-time water quality data and historical trends for ${sensor.locationName || sensor.sensorId}`,

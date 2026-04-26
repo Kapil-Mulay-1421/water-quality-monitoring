@@ -22,7 +22,7 @@ export default function NotFound() {
         
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Sensor Not Found</h1>
         <p className="text-lg text-gray-600 mb-6">
-          The sensor you're looking for doesn't exist or has been removed.
+          The sensor you are looking for does not exist or has been removed.
         </p>
         
         <div className="flex gap-4 justify-center">

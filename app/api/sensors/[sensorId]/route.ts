@@ -1,17 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getDefaultSensor, getDefaultSensors } from '@/lib/default-telemetry';
 
 export async function generateStaticParams() {
-  try {
-    const sensors = await prisma.sensor.findMany({
-      select: { sensorId: true },
-    });
-    return sensors.map((sensor) => ({
-      sensorId: sensor.sensorId,
-    }));
-  } catch {
-    return [];
-  }
+  return getDefaultSensors().map((sensor) => ({
+    sensorId: sensor.sensorId,
+  }));
 }
 
 export async function GET(
@@ -23,12 +17,13 @@ export async function GET(
       where: { sensorId: params.sensorId },
     });
 
-    if (!sensor) {
-      return NextResponse.json({ error: 'Sensor not found' }, { status: 404 });
-    }
+    const defaultSensor = getDefaultSensor(params.sensorId);
+    if (!sensor && !defaultSensor) return NextResponse.json({ error: 'Sensor not found' }, { status: 404 });
 
-    return NextResponse.json(sensor);
+    return NextResponse.json(sensor ?? defaultSensor);
   } catch {
-    return NextResponse.json({ error: 'Failed to fetch sensor' }, { status: 500 });
+    const defaultSensor = getDefaultSensor(params.sensorId);
+    if (!defaultSensor) return NextResponse.json({ error: 'Sensor not found' }, { status: 404 });
+    return NextResponse.json(defaultSensor);
   }
 }
