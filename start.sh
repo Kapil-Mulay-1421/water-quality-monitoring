@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# Ensure prisma client is generated
-npx prisma generate
+# Prisma client is generated at build time inside the image
 
 # Start the MQTT background service in the background
 node services/mqttIngestion.js &

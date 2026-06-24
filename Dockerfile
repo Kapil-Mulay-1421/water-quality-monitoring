@@ -52,6 +52,10 @@ COPY --chown=nextjs:nodejs package.json package-lock.json ./
 RUN npm ci
 RUN npx prisma generate
 
+# Make sure the non-root `nextjs` user can write generated files
+# (prevents EACCES when `start.sh` runs `npx prisma generate`)
+RUN chown -R nextjs:nodejs /app
+
 # Switch to non-root user
 USER nextjs
 
