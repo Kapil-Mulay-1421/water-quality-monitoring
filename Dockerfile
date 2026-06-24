@@ -28,7 +28,6 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Create non-root user
@@ -55,6 +54,9 @@ RUN npx prisma generate
 # Make sure the non-root `nextjs` user can write generated files
 # (prevents EACCES when `start.sh` runs `npx prisma generate`)
 RUN chown -R nextjs:nodejs /app
+
+# Set NODE_ENV to production now that all dependencies are installed
+ENV NODE_ENV production
 
 # Switch to non-root user
 USER nextjs
