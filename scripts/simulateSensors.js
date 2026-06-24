@@ -26,10 +26,10 @@ function generateReading(sensorId) {
   return {
     sensorId,
     timestamp: new Date().toISOString(),
-    pH: (7.0 + Math.random() * 2).toFixed(2),
-    turbidity: (100+Math.random() * 10).toFixed(2),
+    pH: (7 + Math.random() * 2).toFixed(2),
+    turbidity: (Math.random() * 10).toFixed(2),
     temperature: (15 + Math.random() * 15).toFixed(2),
-    hardness: (50 + Math.random() * 200).toFixed(2),
+    hardness: (20 + Math.random() * 200).toFixed(2),
   };
 }
 
