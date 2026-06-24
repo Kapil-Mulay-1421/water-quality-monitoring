@@ -101,28 +101,10 @@ export default function SensorDetailClient({ sensorId }: { sensorId: string }) {
             status={getHardnessStatus(latestReading?.hardness)} 
           />
         </div>
-        {/* Potability Status Banner */}
-{latestReading && (
-  <div className={`rounded-2xl p-5 border-2 flex items-center gap-4 ${
-    getPotabilityBannerStyle(latestReading.potability)
-  }`}>
-    <div className={`text-3xl ${
-      getPotabilityGlow(latestReading.potability)
-    }`}>
-      {getPotabilityIcon(latestReading.potability)}
-    </div>
-    <div>
-      <p className={`font-display text-xl tracking-widest uppercase ${
-        getPotabilityTextColor(latestReading.potability)
-      }`}>
-        {getPotabilityStatusText(latestReading.potability)}
-      </p>
-      <p className="text-xs text-slate-500 font-mono mt-1">
-        ML INFERENCE {latestReading.potability !== null ? `— ${(latestReading.potability * 100).toFixed(2)}% CONFIDENCE` : '— AWAITING MODEL'}
-      </p>
-    </div>
-  </div>
-)}
+        {/* Potability Status Gauge */}
+        <div className="pt-2">
+          <PotabilityGauge potability={latestReading?.potability} />
+        </div>
 
         {/* Time Range Selector & Charts */}
         <div className="pt-6">
@@ -188,50 +170,79 @@ export default function SensorDetailClient({ sensorId }: { sensorId: string }) {
   );
 }
 
-function getPotabilityColor(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return 'text-gray-500';
-  const percentage = potability * 100;
-  if (percentage > 80) return 'text-green-600';
-  if (percentage >= 30) return 'text-yellow-600';
-  return 'text-red-600';
-}
+function PotabilityGauge({ potability }: { potability: number | null | undefined }) {
+  if (potability === null || potability === undefined) {
+    return (
+      <div className="rounded-2xl p-6 border-2 border-slate-800/50 bg-[#0A0A0F]/50 flex flex-col items-center justify-center h-32">
+        <p className="text-slate-500 font-display text-sm tracking-widest uppercase">AWAITING ML MODEL INFERENCE</p>
+      </div>
+    );
+  }
 
-function getPotabilityIcon(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return '⏳';
-  const percentage = potability * 100;
-  if (percentage > 80) return '✅';
-  if (percentage >= 30) return '⚠️';
-  return '⛔';
-}
+  const potabilityPercent = potability * 100;
+  const radius = 45;
+  const strokeWidth = 8;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - potability * circumference;
+  
+  // Smooth color from red (0) to green (120)
+  const hue = potability * 120;
+  const dynamicColor = `hsl(${hue}, 100%, 50%)`;
 
-function getPotabilityBannerStyle(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return 'bg-slate-900/50 border-slate-700';
-  const percentage = potability * 100;
-  if (percentage > 80) return 'bg-green-950/30 border-green-500/50 shadow-[0_0_20px_rgba(74,222,128,0.1)]';
-  if (percentage >= 30) return 'bg-yellow-950/30 border-yellow-500/50 shadow-[0_0_20px_rgba(251,191,36,0.1)]';
-  return 'bg-red-950/30 border-red-500/50 shadow-[0_0_20px_rgba(248,113,113,0.1)]';
-}
+  return (
+    <div className="rounded-2xl p-6 border border-slate-800 bg-gradient-to-br from-[#0A0A0F] to-[#12121A] flex items-center gap-8 relative overflow-hidden shadow-lg">
+      <div 
+        className="absolute inset-0 opacity-5 blur-2xl transition-all duration-1000"
+        style={{ backgroundColor: dynamicColor }}
+      />
+      
+      <div className="relative flex items-center justify-center w-32 h-32 shrink-0">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="64"
+            cy="64"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            className="text-slate-800/50"
+          />
+          <circle
+            cx="64"
+            cy="64"
+            r={radius}
+            stroke={dynamicColor}
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+            style={{
+              filter: `drop-shadow(0 0 8px ${dynamicColor}60)`
+            }}
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center justify-center">
+          <span 
+            className="font-display text-3xl font-bold tracking-wider"
+            style={{ color: dynamicColor, textShadow: `0 0 15px ${dynamicColor}80` }}
+          >
+            {Math.round(potabilityPercent)}
+          </span>
+          <span className="text-slate-400 font-mono text-[9px] tracking-[0.2em] mt-1">SCORE</span>
+        </div>
+      </div>
 
-function getPotabilityGlow(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return '';
-  const percentage = potability * 100;
-  if (percentage > 80) return 'drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]';
-  if (percentage >= 30) return 'drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]';
-  return 'drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]';
-}
-
-function getPotabilityTextColor(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return 'text-slate-500';
-  const percentage = potability * 100;
-  if (percentage > 80) return 'text-green-400';
-  if (percentage >= 30) return 'text-yellow-400';
-  return 'text-red-400';
-}
-
-function getPotabilityStatusText(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return 'POTABILITY UNKNOWN';
-  const percentage = potability * 100;
-  if (percentage > 80) return 'HIGH POTABILITY';
-  if (percentage >= 30) return 'MODERATE POTABILITY';
-  return 'LOW POTABILITY';
+      <div className="z-10">
+        <h3 className="font-display text-xl tracking-[0.2em] uppercase text-white mb-2 flex items-center gap-3">
+          ML Potability Index
+          <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ backgroundColor: dynamicColor, boxShadow: `0 0 10px ${dynamicColor}` }} />
+        </h3>
+        <p className="text-slate-400 font-mono text-xs leading-relaxed max-w-md">
+          Real-time confidence score generated by continuous neural network analysis of combined sensor telemetry. Color continuously maps from hazardous (red) to pure (green).
+        </p>
+      </div>
+    </div>
+  );
 }

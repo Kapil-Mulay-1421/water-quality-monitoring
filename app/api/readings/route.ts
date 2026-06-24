@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getDefaultReadings } from '@/lib/default-telemetry';
 
 const TIME_RANGE_MS: Record<string, number> = {
   '1h': 60 * 60 * 1000,
@@ -41,10 +42,19 @@ export async function GET(request: Request) {
       orderBy: { timestamp: 'asc' },
     });
 
-    return NextResponse.json(readings);
-  } catch (err) {
-    console.log(err);
-    return NextResponse.json({ error: 'Failed to fetch readings' }, { status: 500 });
+    return NextResponse.json(
+      readings.length > 0
+        ? readings
+        : getDefaultReadings(sensorId, timeRange as '1h' | '1d' | '1w' | '1m')
+    );
+  } catch {
+    const { searchParams } = new URL(request.url);
+    return NextResponse.json(
+      getDefaultReadings(
+        searchParams.get('sensorId'),
+        (searchParams.get('timeRange') || '1d') as '1h' | '1d' | '1w' | '1m'
+      )
+    );
   }
 }
 

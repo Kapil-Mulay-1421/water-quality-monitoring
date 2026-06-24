@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { format } from 'date-fns';
 import { SensorWithLatestReading } from '@/lib/types';
 import SensorDashboard from './SensorDashboard';
+import { ChatBot } from './ChatBot';
 
 // Dynamically import map to avoid SSR issues
 const MiniMap = dynamic(() => import('./MiniMap'), { ssr: false });
@@ -131,12 +132,15 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
             </h2>
 
             {latestReading ? (
-              <div className="grid grid-cols-2 gap-4">
-                <ReadingCard label="pH" value={latestReading.ph.toFixed(2)} unit="" icon="💧" color="text-purple-600"/>
-                <ReadingCard label="Turbidity" value={latestReading.turbidity.toFixed(2)} unit="NTU" icon="🌫️" color="text-amber-600"/>
-                <ReadingCard label="Temperature" value={latestReading.temperature.toFixed(1)} unit="°C" icon="🌡️" color="text-red-600"/>
-                <ReadingCard label="Hardness" value={latestReading.hardness.toFixed(1)} unit="mg/L" icon="💎" color="text-blue-600"/>
-                <ReadingCard label="Potability" value={latestReading.potability !== undefined && latestReading.potability !== null ? `${(latestReading.potability * 100).toFixed(2)}%` : 'N/A'} unit="" icon={getPotabilityIcon(latestReading.potability)} color={getPotabilityColor(latestReading.potability)}/>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <ReadingCard label="pH" value={latestReading.ph.toFixed(2)} unit="" icon="💧" color="text-purple-600"/>
+                  <ReadingCard label="Turbidity" value={latestReading.turbidity.toFixed(2)} unit="NTU" icon="🌫️" color="text-amber-600"/>
+                  <ReadingCard label="Temperature" value={latestReading.temperature.toFixed(1)} unit="°C" icon="🌡️" color="text-red-600"/>
+                  <ReadingCard label="Hardness" value={latestReading.hardness.toFixed(1)} unit="mg/L" icon="💎" color="text-blue-600"/>
+                </div>
+                
+                <PotabilityGauge potability={latestReading.potability} />
               </div>
             ) : (
               <p className="text-gray-500 text-center py-10">No live readings</p>
@@ -181,24 +185,76 @@ export default function SensorDetailPage({ sensor: initialSensor }: SensorDetail
 
       </div>
     </main>
+
+    {/* ChatBot Bubble */}
+    <ChatBot context={latestReading} />
   </div>
 );
 }
 
-function getPotabilityColor(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return 'text-gray-500';
-  const percentage = potability * 100;
-  if (percentage > 80) return 'text-green-600';
-  if (percentage >= 30) return 'text-yellow-600';
-  return 'text-red-600';
-}
+function PotabilityGauge({ potability }: { potability: number | null | undefined }) {
+  if (potability === null || potability === undefined) {
+    return (
+      <div className="rounded-xl p-4 border border-gray-200 bg-gray-50 flex flex-col items-center justify-center h-24 text-center">
+        <p className="text-gray-500 font-semibold text-xs tracking-wider uppercase">Awaiting ML Model Inference</p>
+      </div>
+    );
+  }
 
-function getPotabilityIcon(potability: number | null | undefined): string {
-  if (potability === null || potability === undefined) return '⏳';
-  const percentage = potability * 100;
-  if (percentage > 80) return '✅';
-  if (percentage >= 30) return '⚠️';
-  return '⛔';
+  const potabilityPercent = potability * 100;
+  const radius = 35;
+  const strokeWidth = 6;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - potability * circumference;
+  
+  const hue = potability * 120;
+  const dynamicColor = `hsl(${hue}, 80%, 45%)`;
+
+  return (
+    <div className="rounded-xl p-4 border border-gray-200 bg-gradient-to-br from-white to-gray-50 flex items-center gap-6 shadow-sm">
+      <div className="relative flex items-center justify-center w-20 h-20 shrink-0">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="40"
+            cy="40"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            className="text-gray-200"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r={radius}
+            stroke={dynamicColor}
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center justify-center">
+          <span className="text-xl font-bold" style={{ color: dynamicColor }}>
+            {Math.round(potabilityPercent)}
+          </span>
+          <span className="text-gray-400 text-[8px] font-bold tracking-widest mt-0.5">SCORE</span>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2">
+          ML Potability Index
+          <div className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: dynamicColor }} />
+        </h3>
+        <p className="text-gray-500 text-xs leading-relaxed max-w-sm">
+          Real-time confidence score generated by continuous neural network analysis. Color maps from hazardous to pure.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function ReadingCard({

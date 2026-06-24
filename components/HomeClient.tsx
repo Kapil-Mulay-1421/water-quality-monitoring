@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useCallback } from "react";
 import { useSensors } from "@/hooks/use-sensors";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { CreateSensorDialog } from "@/components/CreateSensorDialog";
@@ -15,20 +14,6 @@ const GlobalMap = dynamic(() => import('@/components/GlobalMap').then(m => m.Glo
 
 export default function HomeClient() {
   const { data: sensors, isLoading } = useSensors();
-  const [pendingLatLng, setPendingLatLng] = useState<{ lat: number; lng: number } | null>(null);
-  const [mapDialogOpen, setMapDialogOpen] = useState(false);
-
-  const handleMapClick = useCallback((lat: number, lng: number) => {
-    setPendingLatLng({ lat, lng });
-    setMapDialogOpen(true);
-  }, []);
-
-  const handleDialogClose = useCallback((open: boolean) => {
-    setMapDialogOpen(open);
-    if (!open) {
-      setPendingLatLng(null);
-    }
-  }, []);
 
   if (isLoading) {
     return <LoadingScreen message="SCANNING GLOBAL GRID..." />;
@@ -38,11 +23,7 @@ export default function HomeClient() {
     <div className="relative w-full h-full flex flex-col md:flex-row">
       {/* Map Layer - sits underneath the UI layer */}
       <div className="absolute inset-0 z-0">
-        <GlobalMap 
-          sensors={sensors || []} 
-          onMapClick={handleMapClick}
-          pendingLatLng={pendingLatLng}
-        />
+        <GlobalMap sensors={sensors || []} />
       </div>
 
       {/* Control Panel Overlay */}
@@ -56,12 +37,6 @@ export default function HomeClient() {
               SENSOR NODES
             </h2>
             <CreateSensorDialog />
-          </div>
-
-          {/* Map Click Instructions */}
-          <div className="mb-4 shrink-0 flex items-center gap-2 text-[10px] font-mono text-cyan-500/60 bg-cyan-950/20 px-3 py-2 rounded-lg border border-cyan-500/10">
-            <MapPin className="h-3 w-3 shrink-0" />
-            CLICK MAP TO DEPLOY NODE AT LOCATION
           </div>
 
           {/* Sensor List */}
@@ -97,15 +72,6 @@ export default function HomeClient() {
           </div>
         </div>
       </div>
-
-      {/* Map-click triggered dialog (controlled externally) */}
-      <CreateSensorDialog 
-        controlled
-        open={mapDialogOpen}
-        onOpenChange={handleDialogClose}
-        defaultLatitude={pendingLatLng?.lat}
-        defaultLongitude={pendingLatLng?.lng}
-      />
     </div>
   );
 }

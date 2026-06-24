@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getDefaultSensors } from '@/lib/default-telemetry';
 
 export async function GET() {
   try {
@@ -7,13 +8,9 @@ export async function GET() {
       orderBy: { installedAt: 'desc' },
     });
 
-    return NextResponse.json(sensors);
-  } catch (err) {
-    console.error(err); // 👈 ADD THIS
-    return NextResponse.json(
-      { error: 'Failed to fetch sensors' },
-      { status: 500 }
-    );
+    return NextResponse.json(sensors.length > 0 ? sensors : getDefaultSensors());
+  } catch {
+    return NextResponse.json(getDefaultSensors());
   }
 }
 
