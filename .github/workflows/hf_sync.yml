@@ -1,4 +1,4 @@
-name: Deploy to Hugging Face Space
+name: Deploy to Hugging Face
 
 on:
   push:
@@ -10,18 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Push to Hugging Face Space
+      - name: Create clean deployment commit
+        run: |
+          git checkout --orphan hf-deploy
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "Deploy $(date)"
+
+      - name: Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
           git remote add hf https://mockingjay-7:$HF_TOKEN@huggingface.co/spaces/mockingjay-7/HydroSense
-
-          git push hf main --force
+          git push hf hf-deploy:main --force
