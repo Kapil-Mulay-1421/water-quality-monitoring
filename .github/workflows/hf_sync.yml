@@ -19,7 +19,7 @@ jobs:
       - name: Create HF deployment directory
         run: |
           mkdir hf_push
-          cp -a . hf_push/
+          cp -a --ignore=hf_push . hf_push/
           
       - name: Verify LFS files
         run: |
