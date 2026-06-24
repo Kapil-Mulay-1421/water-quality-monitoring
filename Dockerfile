@@ -41,6 +41,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/services ./services
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/start.sh ./
 
 # Set execute permissions
@@ -48,7 +49,7 @@ RUN chmod +x ./start.sh
 
 # Re-install prod dependencies for the standalone server and ingestion script
 COPY --chown=nextjs:nodejs package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm ci
 RUN npx prisma generate
 
 # Switch to non-root user
