@@ -1,8 +1,10 @@
 const mqtt = require('mqtt');
 require('dotenv').config({ path: '.env.local' });
 
-const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://broker.hivemq.com:1883';
+const MQTT_HOST = process.env.MQTT_HOST || 'mqtt://broker.hivemq.com:1883';
 const MQTT_TOPIC = 'sensors/water-quality';
+const MQTT_USERNAME = process.env.MQTT_USERNAME;
+const MQTT_PASSWORD = process.env.MQTT_PASSWORD;
 
 const sensorIds = [
   // 'SENSOR_NYC_001',
@@ -31,12 +33,17 @@ function generateReading(sensorId) {
 
 function startSimulator() {
   console.log('🚀 Starting MQTT Sensor Simulator...');
-  console.log(`📡 Broker: ${MQTT_BROKER}`);
+  console.log(`📡 Host: ${MQTT_HOST}`);
   console.log(`📢 Topic: ${MQTT_TOPIC}`);
   
-  const client = mqtt.connect(MQTT_BROKER, {
-    clientId: `sensor_simulator_${Math.random().toString(16).substr(2, 8)}`,
+  const client = mqtt.connect({
+    host: process.env.MQTT_HOST,
+    port: Number(process.env.MQTT_PORT),
+    protocol: 'mqtts',
+    username: process.env.MQTT_USERNAME,
+    password: process.env.MQTT_PASSWORD,
     clean: true,
+    clientId: `sensor_simulator_${Math.random().toString(16).slice(2,10)}`
   });
   
   client.on('connect', () => {

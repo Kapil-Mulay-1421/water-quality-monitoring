@@ -4,8 +4,12 @@ const https = require('https');
 require('dotenv').config({ path: '.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/water_quality';
-const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://broker.hivemq.com:1883';
+// const MQTT_BROKER = process.env.MQTT_BROKER || 'mqtt://broker.hivemq.com:8883';
 const MQTT_TOPIC = process.env.MQTT_TOPIC || 'sensors/water-quality/#';
+const MQTT_HOST = process.env.MQTT_HOST;
+const MQTT_PORT = process.env.MQTT_PORT;
+const MQTT_USERNAME = process.env.MQTT_USERNAME;
+const MQTT_PASSWORD = process.env.MQTT_PASSWORD;
 const POTABILITY_API = 'https://dpv007-newclear.hf.space/gradio_api/call/predict_potability';
 
 let db = null;
@@ -208,12 +212,17 @@ async function startMQTTClient() {
   await connectDB();
   
   console.log('Connecting to MQTT broker...');
-  console.log(`  Broker: ${MQTT_BROKER}`);
+  console.log(`  Broker: ${MQTT_HOST}`);
   console.log(`  Topic: ${MQTT_TOPIC}`);
   
-  const client = mqtt.connect(MQTT_BROKER, {
-    clientId: `mqtt_ingestion_${Math.random().toString(16).substr(2, 8)}`,
+  const client = mqtt.connect({
+    host: MQTT_HOST,
+    port: MQTT_PORT,
+    protocol: 'mqtts',
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD,
     clean: true,
+    clientId: `mqtt_ingestion_${Math.random().toString(16).slice(2, 10)}`,
     reconnectPeriod: 5000,
     connectTimeout: 10000,
   });
