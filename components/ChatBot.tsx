@@ -101,7 +101,7 @@ export function ChatBot({ context }: ChatBotProps) {
           {messages.length === 0 && (
             <div className="text-center text-gray-500 text-sm mt-4">
               <p>Hi! I can answer questions about the current water quality data.</p>
-              <p className="mt-2 text-xs">Try asking: "Is the water potable?"</p>
+              <p className="mt-2 text-xs">Try asking: &quot;Is the water potable?&quot;</p>
             </div>
           )}
           {messages.map((m, i) => (
