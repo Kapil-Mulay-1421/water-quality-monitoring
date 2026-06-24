@@ -2,21 +2,12 @@ import { notFound } from 'next/navigation';
 import SensorDetailPage from '@/components/SensorDetailPage';
 import { prisma } from '@/lib/prisma';
 
-// This is a Server Component that fetches initial data
+// This is a Server Component that fetches initial data directly from the database
 async function getSensorData(sensorId: string) {
   try {
-    // In production, use full URL. In dev, relative works fine
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/sensors`, {
-      cache: 'no-store' // Always get fresh data
+    return await prisma.sensor.findUnique({
+      where: { sensorId },
     });
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const sensors = await response.json();
-    return sensors.find((s: any) => s.sensorId === sensorId);
   } catch (error) {
     console.error('Error fetching sensor:', error);
     return null;
