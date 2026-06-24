@@ -16,7 +16,7 @@ const sensorIds = [
   // 'SENSOR_SAO_001',
   // 'SENSOR_CAI_001',
   // 'SENSOR_SFO_001',
-  'SENSOR_PUN_001'
+  'SENSOR_NAG_001'
   // 'SENSOR_PUN_002',
   // "AQUA_007",
   // "AQUA_008"

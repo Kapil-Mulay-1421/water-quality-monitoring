@@ -7,8 +7,8 @@ const sampleSensors = [
   { sensorId: 'SENSOR_NYC_001', latitude: 40.7128, longitude: -74.0060, locationName: 'New York Hub' },
   { sensorId: 'SENSOR_LON_002', latitude: 51.5074, longitude: -0.1278,  locationName: 'London Hub' },
   { sensorId: 'SENSOR_TOK_003', latitude: 35.6762, longitude: 139.6503, locationName: 'Tokyo Hub' },
-  { sensorId: 'SENSOR_SYD_004', latitude: -33.8688, longitude: 151.2093, locationName: 'Sydney Hub' },
-  { sensorId: 'SENSOR_MUM_005', latitude: 19.0760,  longitude: 72.8777,  locationName: 'Mumbai Hub' },
+  { sensorId: 'SENSOR_PUN_001', latitude: 18.5204, longitude: 73.8567,  locationName: 'Punjab Hub' },
+  { sensorId: 'SENSOR_PUN_002', latitude: 18.5244, longitude: 73.8612,  locationName: 'Punjab Secondary' },
 ];
 
 async function seed() {

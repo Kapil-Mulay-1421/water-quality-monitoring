@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ChatBot } from './ChatBot';
 
   import { useState } from "react";
 import { ChevronLeft, MapPin, Droplets, Wind, Thermometer, Hexagon } from "lucide-react";
@@ -165,6 +166,7 @@ export default function SensorDetailClient({ sensorId }: { sensorId: string }) {
             </div>
           )}
         </div>
+          <ChatBot context={latestReading} />
       </div>
     </div>
   );
