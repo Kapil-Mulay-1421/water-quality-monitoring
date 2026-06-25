@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 require('dotenv').config({ path: '.env.local' });
 
+// extract environment variables here
 const MQTT_HOST = process.env.MQTT_HOST || 'mqtt://broker.hivemq.com:1883';
 const MQTT_TOPIC = 'sensors/water-quality';
 const MQTT_USERNAME = process.env.MQTT_USERNAME;
@@ -69,7 +70,7 @@ function startSimulator() {
       
       client.publish(topic, JSON.stringify(reading));
       console.log(`📤 ${randomSensor}: pH=${reading.pH}, temp=${reading.temperature}°C`);
-    }, 120000 + Math.random() * 20000); // Random interval between 120-140 seconds
+    }, 100000 + Math.random() * 20000); // Random interval between 100-120 seconds
   });
   
   client.on('error', (error) => {
